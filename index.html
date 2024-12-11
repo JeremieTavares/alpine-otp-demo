@@ -13,9 +13,9 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
 		integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
 		crossorigin="anonymous" referrerpolicy="no-referrer" />
-	<script type="module" crossorigin src="./main.js"></script>
-	<link rel="modulepreload" crossorigin href="./main2.js">
-	<link rel="stylesheet" crossorigin href="./main.css">
+	<script type="module" crossorigin src="./js/main.js"></script>
+	<link rel="modulepreload" crossorigin href="./js/main2.js">
+	<link rel="stylesheet" crossorigin href="./css/main.css">
 </head>
 
 <!-- Initialize the inputs, wait for the next tick to ensure the inputs are initialized since the inputs are created using Alpine.js x-for -->
@@ -67,7 +67,8 @@
 		<button @click="$store.otpForm.toggleTimerVisibility()" class="otp__demo-btn">
 			<i class="fa fa-refresh"></i>
 			Toggle Timer Visibility
-			<span x-text="$store.otpForm.timer.show"></span>
+			<span :class="{ 'red': !$store.otpForm.timer.show, 'green': $store.otpForm.timer.show }"
+				x-text="$store.otpForm.timer.show"></span>
 		</button>
 
 		<!-- Start the timer -->
@@ -87,14 +88,16 @@
 		<button @click="$store.otpForm.toggleFormVisibility()" class="otp__demo-btn">
 			<i class="fa fa-refresh"></i>
 			Toggle Form Visibility
-			<span x-text="$store.otpForm.showForm"></span>
+			<span :class="{ 'red': !$store.otpForm.showForm, 'green': $store.otpForm.showForm }"
+				x-text="$store.otpForm.showForm"></span>
 		</button>
 
 		<!-- toggle submit on fulfilled -->
 		<button @click="$store.otpForm.submitOnFulfill = !$store.otpForm.submitOnFulfill" class="otp__demo-btn">
 			<i class="fa fa-refresh"></i>
 			Toggle Submit on Fulfilled
-			<span x-text="$store.otpForm.submitOnFulfill"></span>
+			<span :class="{ 'red': !$store.otpForm.submitOnFulfill, 'green': $store.otpForm.submitOnFulfill }"
+				x-text="$store.otpForm.submitOnFulfill"></span>
 		</button>
 
 		<!-- toggle clear error on backspace -->
@@ -102,7 +105,9 @@
 			class="otp__demo-btn">
 			<i class="fa fa-refresh"></i>
 			Toggle Clear Error on Backspace
-			<span x-text="$store.otpForm.clearErrorOnBackspace"></span>
+			<span
+				:class="{ 'red': !$store.otpForm.clearErrorOnBackspace, 'green': $store.otpForm.clearErrorOnBackspace }"
+				x-text="$store.otpForm.clearErrorOnBackspace"></span>
 		</button>
 
 		<!-- toggle use callbacks -->
@@ -110,7 +115,8 @@
 			title="Output in the console">
 			<i class="fa fa-refresh"></i>
 			Toggle Use Callbacks
-			<span x-text="$store.otpForm.useCallbacks"></span>
+			<span :class="{ 'red': !$store.otpForm.useCallbacks, 'green': $store.otpForm.useCallbacks }"
+				x-text="$store.otpForm.useCallbacks"></span>
 		</button>
 
 		<!-- toggle use events -->
@@ -118,7 +124,8 @@
 			title="Output in the console">
 			<i class="fa fa-refresh"></i>
 			Toggle Use Events
-			<span x-text="$store.otpForm.useEvents"></span>
+			<span :class="{ 'red': !$store.otpForm.useEvents, 'green': $store.otpForm.useEvents }"
+				x-text="$store.otpForm.useEvents"></span>
 		</button>
 	</div>
 
