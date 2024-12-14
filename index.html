@@ -1,268 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>OTP Form</title>
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>OTP Form</title>
+		<!-- Include font-awesome 5 CDN -->
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+			integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer" />
+		<script type="module" crossorigin src="./index.js"></script>
+		<link rel="stylesheet" crossorigin href="./index.css" />
+	</head>
 
+	<!-- Initialize the inputs, wait for the next tick to ensure the inputs are initialized since the inputs are created using Alpine.js x-for -->
+	<!-- Normally, the inputs are automatically initialized in the otpForm when the user starts typing, pasting, submitting etc -->
+	<!-- Since this is a debug/testing page, we need to initialize the inputs manually so that the testing buttons are enabled without further user interaction -->
 
+	<body x-data x-init="$nextTick(() => $store.otpForm.handleInputsInit())">
+		<!-- Make a note to display the otp to trigger a success (123456)-->
 
+		<div class="otp__demo-controls">
+			<div class="otp__demo-controls-note">The OTP is <span class="otp__demo-controls-highlight">123456</span></div>
 
-	<!-- Include font-awesome 5 CDN -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
-		integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
-		crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script type="module" crossorigin src="./index.js"></script>
-  <link rel="stylesheet" crossorigin href="./index.css">
-</head>
+			<!-- Switch Light/Dark Mode -->
+			<button
+				@click="()=> document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')"
+				class="otp__demo-btn">
+				<i class="fa fa-adjust"></i>
+				Switch Theme
+			</button>
 
-<!-- Initialize the inputs, wait for the next tick to ensure the inputs are initialized since the inputs are created using Alpine.js x-for -->
-<!-- Normally, the inputs are automatically initialized in the otpForm when the user starts typing, pasting, submitting etc -->
-<!-- Since this is a debug/testing page, we need to initialize the inputs manually so that the testing buttons are enabled without further user interaction -->
+			<!-- Send the OTP -->
+			<button @click="$store.otpForm.resendOtp()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
+				<i class="fa fa-paper-plane"></i>
+				Send OTP
+			</button>
 
-<body x-data x-init="$nextTick(() => $store.otpForm.handleInputsInit())">
+			<!-- Verify the OTP -->
+			<button @click="$store.otpForm.submitOtp()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
+				<i class="fa fa-check"></i>
+				Verify OTP
+			</button>
 
-	<!-- Make a note to display the otp to trigger a success (123456)-->
+			<!-- Reset the OTP input value -->
+			<button @click="$store.otpForm.resetOtp()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
+				<i class="fa fa-refresh"></i>
+				Reset Inputs
+			</button>
 
-	<div class="otp__demo-controls">
+			<!-- Reset the Alpine store state from the merged config (default config + user config) -->
+			<button
+				@click="$store.otpForm.resetState()"
+				class="otp__demo-btn"
+				:disabled="$store.otpForm.isLoading"
+				title="Reset state with merged defaultConfig + user config">
+				<i class="fa fa-refresh"></i>
+				Reset State
+			</button>
 
-		<div class="otp__demo-controls-note">
-			The OTP is <span class="otp__demo-controls-highlight">123456</span>
+			<!-- Reset the Alpine store state from the merged config (default config + user config) -->
+			<button
+				@click="$store.otpForm.resetState(true)"
+				class="otp__demo-btn"
+				:disabled="$store.otpForm.isLoading"
+				title="Reset state with merged defaultConfig (the user config is not taken into account)">
+				<i class="fa fa-refresh"></i>
+				Hard Reset State
+			</button>
+
+			<!-- Clear errors -->
+			<button @click="$store.otpForm.clearErrors()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
+				<i class="fa fa-refresh"></i>
+				Clear Error
+			</button>
+
+			<!-- Start the timer -->
+			<button @click="$store.otpForm.startTimer()" class="otp__demo-btn">
+				<i class="fa fa-play"></i>
+				Start Timer
+			</button>
+
+			<!-- Stop the timer -->
+			<button @click="$store.otpForm.resetTimer()" class="otp__demo-btn">
+				<i class="fa fa-stop"></i>
+				Reset Timer
+				<span x-text="$store.otpForm.timer.remainingTimeDisplay"></span>
+			</button>
+
+			<!-- Toggle the timer visibility -->
+			<button @click="$store.otpForm.setTimerVisibility()" class="otp__demo-btn">
+				<i class="fa fa-refresh"></i>
+				Toggle Timer Visibility
+				<span
+					:class="{ 'red': !$store.otpForm.timer.show, 'green': $store.otpForm.timer.show }"
+					x-text="$store.otpForm.timer.show"></span>
+			</button>
+
+			<!-- Toggle the form visibility -->
+			<button @click="$store.otpForm.setFormVisibility()" class="otp__demo-btn">
+				<i class="fa fa-refresh"></i>
+				Toggle Form Visibility
+				<span
+					:class="{ 'red': !$store.otpForm.showForm, 'green': $store.otpForm.showForm }"
+					x-text="$store.otpForm.showForm"></span>
+			</button>
+
+			<!-- toggle submit on fulfilled -->
+			<button @click="$store.otpForm.submitOnFulfill = !$store.otpForm.submitOnFulfill" class="otp__demo-btn">
+				<i class="fa fa-refresh"></i>
+				Toggle Submit on Fulfilled
+				<span
+					:class="{ 'red': !$store.otpForm.submitOnFulfill, 'green': $store.otpForm.submitOnFulfill }"
+					x-text="$store.otpForm.submitOnFulfill"></span>
+			</button>
+
+			<!-- toggle disabled otp after success -->
+			<button @click="$store.otpForm.setDisabledOtpAfterSuccess()" class="otp__demo-btn">
+				<i class="fa fa-refresh"></i>
+				Toggle Disabled OTP after Success
+				<span
+					:class="{ 'red': !$store.otpForm.disableOtpAfterSuccess, 'green': $store.otpForm.disableOtpAfterSuccess }"
+					x-text="$store.otpForm.disableOtpAfterSuccess"></span>
+			</button>
+
+			<!-- toggle clear error on backspace -->
+			<button @click="$store.otpForm.clearErrorOnBackspace = !$store.otpForm.clearErrorOnBackspace" class="otp__demo-btn">
+				<i class="fa fa-refresh"></i>
+				Toggle Clear Error on Backspace
+				<span
+					:class="{ 'red': !$store.otpForm.clearErrorOnBackspace, 'green': $store.otpForm.clearErrorOnBackspace }"
+					x-text="$store.otpForm.clearErrorOnBackspace"></span>
+			</button>
+
+			<!-- toggle clear error on backspace -->
+			<button @click="$store.otpForm.setClearInputsOnError()" class="otp__demo-btn">
+				<i class="fa fa-refresh"></i>
+				Toggle clear otp inputs on error
+				<span
+					:class="{ 'red': !$store.otpForm.clearInputsOnError, 'green': $store.otpForm.clearInputsOnError }"
+					x-text="$store.otpForm.clearInputsOnError"></span>
+			</button>
+
+			<!-- toggle use callbacks -->
+			<button
+				@click="$store.otpForm.setUseCallbacks(!$store.otpForm.getUseCallbacks())"
+				class="otp__demo-btn"
+				title="Output in the console">
+				<i class="fa fa-refresh"></i>
+				Toggle Use Callbacks
+				<span
+					:class="{ 'red': !$store.otpForm.getUseCallbacks(), 'green': $store.otpForm.getUseCallbacks() }"
+					x-text="$store.otpForm.getUseCallbacks()"></span>
+			</button>
+
+			<!-- toggle use events -->
+			<button
+				@click="$store.otpForm.setUseEvents(!$store.otpForm.getUseEvents())"
+				class="otp__demo-btn"
+				title="Output in the console">
+				<i class="fa fa-refresh"></i>
+				Toggle Use Events
+				<span
+					:class="{ 'red': !$store.otpForm.getUseEvents(), 'green': $store.otpForm.getUseEvents() }"
+					x-text="$store.otpForm.getUseEvents()"></span>
+			</button>
 		</div>
-		<!-- Send the OTP -->
-		<button @click="$store.otpForm.resendOtp()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
-			<i class="fa fa-paper-plane"></i>
-			Send OTP
-		</button>
 
-		<!-- Verify the OTP -->
-		<button @click="$store.otpForm.submitOtp()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
-			<i class="fa fa-check"></i>
-			Verify OTP
-		</button>
-
-		<!-- Reset the OTP input value -->
-		<button @click="$store.otpForm.resetOtp()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
-			<i class="fa fa-refresh"></i>
-			Reset Inputs
-		</button>
-
-		<!-- Reset the Alpine store state from the merged config (default config + user config) -->
-		<button @click="$store.otpForm.resetState()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading"
-			title="Reset state with merged defaultConfig + user config">
-			<i class="fa fa-refresh"></i>
-			Reset State
-		</button>
-
-		<!-- Reset the Alpine store state from the merged config (default config + user config) -->
-		<button @click="$store.otpForm.resetState(true)" class="otp__demo-btn" :disabled="$store.otpForm.isLoading"
-			title="Reset state with merged defaultConfig (the user config is not taken into account)">
-			<i class="fa fa-refresh"></i>
-			Hard Reset State
-		</button>
-
-		<!-- Clear errors -->
-		<button @click="$store.otpForm.clearErrors()" class="otp__demo-btn" :disabled="$store.otpForm.isLoading">
-			<i class="fa fa-refresh"></i>
-			Clear Error
-		</button>
-
-
-		<!-- Start the timer -->
-		<button @click="$store.otpForm.startTimer()" class="otp__demo-btn">
-			<i class="fa fa-play"></i>
-			Start Timer
-		</button>
-
-		<!-- Stop the timer -->
-		<button @click="$store.otpForm.resetTimer()" class="otp__demo-btn">
-			<i class="fa fa-stop"></i>
-			Reset Timer
-			<span x-text="$store.otpForm.timer.remainingTimeDisplay"></span>
-		</button>
-
-		<!-- Toggle the timer visibility -->
-		<button @click="$store.otpForm.setTimerVisibility()" class="otp__demo-btn">
-			<i class="fa fa-refresh"></i>
-			Toggle Timer Visibility
-			<span :class="{ 'red': !$store.otpForm.timer.show, 'green': $store.otpForm.timer.show }"
-				x-text="$store.otpForm.timer.show"></span>
-		</button>
-
-		<!-- Toggle the form visibility -->
-		<button @click="$store.otpForm.setFormVisibility()" class="otp__demo-btn">
-			<i class="fa fa-refresh"></i>
-			Toggle Form Visibility
-			<span :class="{ 'red': !$store.otpForm.showForm, 'green': $store.otpForm.showForm }"
-				x-text="$store.otpForm.showForm"></span>
-		</button>
-
-		<!-- toggle submit on fulfilled -->
-		<button @click="$store.otpForm.submitOnFulfill = !$store.otpForm.submitOnFulfill" class="otp__demo-btn">
-			<i class="fa fa-refresh"></i>
-			Toggle Submit on Fulfilled
-			<span :class="{ 'red': !$store.otpForm.submitOnFulfill, 'green': $store.otpForm.submitOnFulfill }"
-				x-text="$store.otpForm.submitOnFulfill"></span>
-		</button>
-
-		<!-- toggle disabled otp after success -->
-		<button @click="$store.otpForm.setDisabledOtpAfterSuccess()" class="otp__demo-btn">
-			<i class="fa fa-refresh"></i>
-			Toggle Disabled OTP after Success
-			<span
-				:class="{ 'red': !$store.otpForm.disableOtpAfterSuccess, 'green': $store.otpForm.disableOtpAfterSuccess }"
-				x-text="$store.otpForm.disableOtpAfterSuccess"></span>
-		</button>
-
-		<!-- toggle clear error on backspace -->
-		<button @click="$store.otpForm.clearErrorOnBackspace = !$store.otpForm.clearErrorOnBackspace"
-			class="otp__demo-btn">
-			<i class="fa fa-refresh"></i>
-			Toggle Clear Error on Backspace
-			<span
-				:class="{ 'red': !$store.otpForm.clearErrorOnBackspace, 'green': $store.otpForm.clearErrorOnBackspace }"
-				x-text="$store.otpForm.clearErrorOnBackspace"></span>
-		</button>
-
-		<!-- toggle clear error on backspace -->
-		<button @click="$store.otpForm.setClearInputsOnError()" class="otp__demo-btn">
-			<i class="fa fa-refresh"></i>
-			Toggle clear otp inputs on error
-			<span :class="{ 'red': !$store.otpForm.clearInputsOnError, 'green': $store.otpForm.clearInputsOnError }"
-				x-text="$store.otpForm.clearInputsOnError"></span>
-		</button>
-
-		<!-- toggle use callbacks -->
-		<button @click="$store.otpForm.setUseCallbacks(!$store.otpForm.getUseCallbacks())" class="otp__demo-btn"
-			title="Output in the console">
-			<i class="fa fa-refresh"></i>
-			Toggle Use Callbacks
-			<span :class="{ 'red': !$store.otpForm.getUseCallbacks(), 'green': $store.otpForm.getUseCallbacks() }"
-				x-text="$store.otpForm.getUseCallbacks()"></span>
-		</button>
-
-		<!-- toggle use events -->
-		<button @click="$store.otpForm.setUseEvents(!$store.otpForm.getUseEvents())" class="otp__demo-btn"
-			title="Output in the console">
-			<i class="fa fa-refresh"></i>
-			Toggle Use Events
-			<span :class="{ 'red': !$store.otpForm.getUseEvents(), 'green': $store.otpForm.getUseEvents() }"
-				x-text="$store.otpForm.getUseEvents()"></span>
-		</button>
-	</div>
-
-	<div class="otp" x-show="$store.otpForm.showForm">
-		<div class="otp__container">
-			<!-- Logo -->
-			<div class="otp__logo">
-				<img src="https://cdn.freebiesupply.com/images/large/2x/facebook-logo-white-full-transparent.png"
-					alt="Logo" class="otp__logo-img" />
-			</div>
-
-			<h2 class="otp__title">Enter Verification Code</h2>
-
-			<p class="otp__subtitle">A verification code has been sent to your email address</p>
-
-			<template x-if="$store.otpForm.otpResent">
-				<div class="otp__success">
-					<i class="fa fa-check-circle otp__success-icon"></i>
-					<span class="otp__success-text"> A new code has been sent to your email </span>
+		<div class="otp" x-show="$store.otpForm.showForm">
+			<div class="otp__container">
+				<!-- Logo -->
+				<div class="otp__logo">
+					<div class="otp__logo-img"></div>
 				</div>
-			</template>
 
-			<!-- Display the error message -->
-			<template x-if="$store.otpForm.errors.message">
-				<div class="otp__error">
-					<i class="fa fa-exclamation-circle otp__error-icon"></i>
-					<span x-text="$store.otpForm.errors.message" class="otp__error-text"></span>
-				</div>
-			</template>
+				<h2 class="otp__title">Enter Verification Code</h2>
 
-			<!-- Display the generic error message -->
-			<template x-if="$store.otpForm.errors.generic">
-				<div class="otp__error">
-					<i class="fa fa-exclamation-circle otp__error-icon"></i>
-					<span x-text="$store.otpForm.errors.generic" class="otp__error-text"></span>
-				</div>
-			</template>
+				<p class="otp__subtitle">A verification code has been sent to your email address</p>
 
-			<form @submit.prevent="$store.otpForm.submitOtp()" class="otp__form" id="otpForm"
-				:action="$store.otpForm.endPointVerify" method="POST">
-				<div class="otp__inputs" :class="{ 'otp__inputs--error': $store.otpForm.errors.message }">
-					<!-- Generate the OTP inputs based on the otpLength prop -->
-					<template x-for="i in $store.otpForm.otpLength" :key="i">
-						<div class="otp__group">
-							<div class="otp__input-wrapper">
-								<input type="text" class="otp__input" maxlength="1" inputmode="numeric" pattern="[0-9]"
-									:id="`otp_input_${i}`" @keyup="$store.otpForm.handleInput($el, $event)"
-									@keyup.backspace="$store.otpForm.handleBackspace($el, $event)"
-									@keyup.left="$store.otpForm.selectInput(document.getElementById(`otp_input_${i === 1 ? i : i - 1}`))"
-									@keyup.right="$store.otpForm.selectInput(document.getElementById(`otp_input_${i === $store.otpForm.otpLength ? i : i + 1}`))"
-									@paste="$store.otpForm.handlePaste($event)" :autofocus="i === 1"
-									@focus="$store.otpForm.focusedInputPosition = i" :position="i"
-									:disabled="$store.otpForm.isLoading || ($store.otpForm.disableOtpAfterSuccess && $store.otpForm.isSuccess)" />
-								<div class="otp__input-line"></div>
+				<template x-if="$store.otpForm.otpResent">
+					<div class="otp__success">
+						<i class="fa fa-check-circle otp__success-icon"></i>
+						<span class="otp__success-text"> A new code has been sent to your email </span>
+					</div>
+				</template>
+
+				<!-- Display the error message -->
+				<template x-if="$store.otpForm.errors.message">
+					<div class="otp__error">
+						<i class="fa fa-exclamation-circle otp__error-icon"></i>
+						<span x-text="$store.otpForm.errors.message" class="otp__error-text"></span>
+					</div>
+				</template>
+
+				<!-- Display the generic error message -->
+				<template x-if="$store.otpForm.errors.generic">
+					<div class="otp__error">
+						<i class="fa fa-exclamation-circle otp__error-icon"></i>
+						<span x-text="$store.otpForm.errors.generic" class="otp__error-text"></span>
+					</div>
+				</template>
+
+				<form
+					@submit.prevent="$store.otpForm.submitOtp()"
+					class="otp__form"
+					id="otpForm"
+					:action="$store.otpForm.endPointVerify"
+					method="POST">
+					<div class="otp__inputs" :class="{ 'otp__inputs--error': $store.otpForm.errors.message }">
+						<!-- Generate the OTP inputs based on the otpLength prop -->
+						<template x-for="i in $store.otpForm.otpLength" :key="i">
+							<div class="otp__group">
+								<div class="otp__input-wrapper">
+									<input
+										type="text"
+										class="otp__input"
+										maxlength="1"
+										inputmode="numeric"
+										pattern="[0-9]"
+										:id="`otp_input_${i}`"
+										@keyup="$store.otpForm.handleInput($el, $event)"
+										@keyup.backspace="$store.otpForm.handleBackspace($el, $event)"
+										@keyup.left="$store.otpForm.selectInput(document.getElementById(`otp_input_${i === 1 ? i : i - 1}`))"
+										@keyup.right="$store.otpForm.selectInput(document.getElementById(`otp_input_${i === $store.otpForm.otpLength ? i : i + 1}`))"
+										@paste="$store.otpForm.handlePaste($event)"
+										:autofocus="i === 1"
+										@focus="$store.otpForm.focusedInputPosition = i"
+										:position="i"
+										:disabled="$store.otpForm.isLoading || ($store.otpForm.disableOtpAfterSuccess && $store.otpForm.isSuccess)" />
+									<div class="otp__input-line"></div>
+								</div>
+
+								<!-- Display the separator if the current input is the middle input (ex: otpLength = 6, i = 3) -->
+								<template x-if="i === Math.round($store.otpForm.otpLength / 2)">
+									<div class="otp__separator"></div>
+								</template>
 							</div>
+						</template>
+					</div>
 
-							<!-- Display the separator if the current input is the middle input (ex: otpLength = 6, i = 3) -->
-							<template x-if="i === Math.round($store.otpForm.otpLength / 2)">
-								<div class="otp__separator"></div>
-							</template>
-						</div>
-					</template>
-				</div>
+					<!-- Display the timer (time remaining otp expiration) -->
+					<div class="otp__info" x-show="$store.otpForm.timer.show">
+						<p class="otp__info-text">
+							The code will expire in
+							<span class="otp__info-highlight" x-text="$store.otpForm.timer.remainingTimeDisplay"></span>
+						</p>
+					</div>
 
-				<!-- Display the timer (time remaining otp expiration) -->
-				<div class="otp__info" x-show="$store.otpForm.timer.show">
-					<p class="otp__info-text">
-						The code will expire in
-						<span class="otp__info-highlight" x-text="$store.otpForm.timer.remainingTimeDisplay"></span>
-					</p>
-				</div>
+					<!-- Submit the OTP -->
+					<button
+						type="submit"
+						class="otp__submit"
+						:class="{ 'otp__submit--loading': $store.otpForm.isLoading }"
+						:disabled="$store.otpForm.isLoading || $store.otpForm.otp.length !== $store.otpForm.otpLength">
+						<!-- Display the submit text if the form is not loading (pending request) and the showRedirectMessage is false -->
+						<template x-if="!$store.otpForm.isLoading && !$store.otpForm.showRedirectMessage && !$store.otpForm.isSuccess">
+							<span> Verify Code </span>
+						</template>
 
-				<!-- Submit the OTP -->
-				<button type="submit" class="otp__submit" :class="{ 'otp__submit--loading': $store.otpForm.isLoading }"
-					:disabled="$store.otpForm.isLoading || $store.otpForm.otp.length !== $store.otpForm.otpLength">
-					<!-- Display the submit text if the form is not loading (pending request) and the showRedirectMessage is false -->
-					<template
-						x-if="!$store.otpForm.isLoading && !$store.otpForm.showRedirectMessage && !$store.otpForm.isSuccess">
-						<span> Verify Code </span>
-					</template>
+						<!-- Display the loading text if the form is loading (pending request) -->
+						<template x-if="$store.otpForm.isLoading">
+							<span>
+								<i class="fa fa-spinner fa-spin"></i>
+								Please wait...
+							</span>
+						</template>
 
-					<!-- Display the loading text if the form is loading (pending request) -->
-					<template x-if="$store.otpForm.isLoading">
-						<span>
-							<i class="fa fa-spinner fa-spin"></i>
-							Please wait...
-						</span>
-					</template>
-
-					<!-- Display the success message if the form is not loading (no pending request) and the showRedirectMessage is true -->
-					<template x-if="!$store.otpForm.isLoading && $store.otpForm.isSuccess">
-						<span class="d-flex justify-content-center align-items-center"> 🎉 Success! 🎉</span>
-					</template>
-				</button>
-
-				<!-- Under the otp inputs; -->
-				<div class="otp__actions">
-					<!-- Resend the OTP -->
-					<button type="button" @click="$store.otpForm.resendOtp()" class="otp__action-btn"
-						:disabled="$store.otpForm.isLoading">
-						<i class="fa fa-refresh"></i>
-						Resend Code
+						<!-- Display the success message if the form is not loading (no pending request) and the showRedirectMessage is true -->
+						<template x-if="!$store.otpForm.isLoading && $store.otpForm.isSuccess">
+							<span class="d-flex justify-content-center align-items-center"> 🎉 Success! 🎉</span>
+						</template>
 					</button>
 
-					<!-- Back to login -->
-					<button type="button" @click="$store.otpForm.setFormVisibility(false)" class="otp__action-btn"
-						:disabled="$store.otpForm.isLoading">
-						<i class="fa fa-arrow-left"></i>
-						Back to Login
-					</button>
-				</div>
-			</form>
+					<!-- Under the otp inputs; -->
+					<div class="otp__actions">
+						<!-- Resend the OTP -->
+						<button
+							type="button"
+							@click="$store.otpForm.resendOtp()"
+							class="otp__action-btn"
+							:disabled="$store.otpForm.isLoading">
+							<i class="fa fa-refresh"></i>
+							Resend Code
+						</button>
+
+						<!-- Back to login -->
+						<button
+							type="button"
+							@click="$store.otpForm.setFormVisibility(false)"
+							class="otp__action-btn"
+							:disabled="$store.otpForm.isLoading">
+							<i class="fa fa-arrow-left"></i>
+							Back to Login
+						</button>
+					</div>
+				</form>
+			</div>
 		</div>
-	</div>
-</body>
-
+	</body>
 </html>
